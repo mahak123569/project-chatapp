@@ -89,7 +89,10 @@ export const login = async (req,res)=> {
             email:user.email,
             profilePic:user.profilePic
         })
-        }catch(error){}
+        }catch(error){
+            console.log("Error in login controllr",error.message);
+            res.status(500).json({message:"Internal Server Error"});
+        }
 };
 export const logout = async (req,res)=> {
   res.send("logout route");

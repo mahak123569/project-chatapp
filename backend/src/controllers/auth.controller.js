@@ -72,7 +72,7 @@ export const signup = async (req, res) => {
 
 };
 export const login = async (req,res)=> {
-    const { email,password} = res.body;
+    const { email,password} = req.body;
     try{
         const user = await User.findOne({email});
         if (!user){
@@ -95,5 +95,9 @@ export const login = async (req,res)=> {
         }
 };
 export const logout = async (req,res)=> {
-  res.send("logout route");
+ try {
+    res.cookie("j)wt","",{maxAge:0})
+ } catch {error} {
+console.log("Error in logout controller",error.message);
+ }
 };

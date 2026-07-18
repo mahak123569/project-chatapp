@@ -105,4 +105,8 @@ res.status(500).json({message: "Internal Server Error"});
 
  }
 };
-export const updateProfile = async(req,res)=>{};
+export const updateProfile = async(req,res)=>{
+    res.status(200).json({
+        message: "Update profile route working"
+    });
+};

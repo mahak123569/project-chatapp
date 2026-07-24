@@ -7,8 +7,11 @@ import SettingsPage from "./Pages/SettingsPage";
 import ProfilePage from "./Pages/ProfilePage";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import axios from "axios";
+import { axiosInstanace } from "./components/lib/axios";
 
 const App = () => {
+  const {authUser} = userAuthStore ()
   return (
     <BrowserRouter>
       <Navbar />

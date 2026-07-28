@@ -90,7 +90,7 @@ const SignUpPage = () => {
               />
             </div>
 
-            {/* Email */}
+            
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Email</span>
@@ -111,7 +111,7 @@ const SignUpPage = () => {
               />
             </div>
 
-            {/* Password */}
+            
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Password</span>

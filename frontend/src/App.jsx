@@ -7,39 +7,97 @@ import SettingsPage from "./Pages/SettingsPage";
 import ProfilePage from "./Pages/ProfilePage";
 
 import { useEffect } from "react";
+import { Loader } from "lucide-react";
 
-import {Loader} from "lucide-react"
+import {
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
-
-import { Routes, Route, Navigate } from "react-router-dom";
-
-import { useAuthStore } from "./Pages/store/useAuthStore.js";
+import { useAuthStore } from "./Pages/store/useAuthStore";
 
 const App = () => {
-  const { authUser, checkAuth,isCheckingAuth } = useAuthStore();
+  const {
+    authUser,
+    checkAuth,
+    isCheckingAuth,
+  } = useAuthStore();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
-  if(isCheckingAuth && !authUser) return (
-    <div className="flex items-center justify-center h-screen">
-      <Loader className="size-10 animate-spin" />
-    </div>
-  )
+  if (isCheckingAuth && !authUser) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader className="size-10 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <>
       <Navbar />
 
       <Routes>
-        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" replace />} />
-        <Route path="/signup" element={authUser ? <Navigate to="/" replace /> : <SignupPage />} />
-        <Route path="/login" element={authUser ? <Navigate to="/" replace /> : <LoginPage />} />
-        <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" replace />} />
-        <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" replace />} />
-      </Routes>
 
+        <Route
+          path="/"
+          element={
+            authUser ? (
+              <HomePage />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/signup"
+          element={
+            authUser ? (
+              <Navigate to="/" replace />
+            ) : (
+              <SignupPage />
+            )
+          }
+        />
+
+        <Route
+          path="/login"
+          element={
+            authUser ? (
+              <Navigate to="/" replace />
+            ) : (
+              <LoginPage />
+            )
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            authUser ? (
+              <SettingsPage />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            authUser ? (
+              <ProfilePage />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+      </Routes>
     </>
   );
 };

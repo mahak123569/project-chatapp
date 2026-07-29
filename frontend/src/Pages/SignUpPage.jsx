@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAuthStore } from "./store/useAuthStore";
 import { MessageSquare } from "lucide-react";
 import toast from "react-hot-toast";
@@ -43,15 +43,16 @@ const SignUpPage = () => {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
-      {/* Left Side - Form */}
+
+      {/* LEFT SIDE */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
 
-          {/* Logo / Heading */}
+          {/* Heading */}
           <div className="text-center mb-8">
-            <div className="flex flex-col items-center gap-2 group">
+            <div className="flex flex-col items-center gap-2">
 
-              <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center">
                 <MessageSquare className="size-6 text-primary" />
               </div>
 
@@ -66,20 +67,24 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {/* FORM */}
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6"
+          >
 
             {/* Full Name */}
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Full Name</span>
+                <span className="label-text">
+                  Full Name
+                </span>
               </label>
 
               <input
                 type="text"
                 placeholder="Enter your full name"
                 className="input input-bordered w-full"
-                required
                 value={formData.fullName}
                 onChange={(e) =>
                   setFormData({
@@ -90,17 +95,18 @@ const SignUpPage = () => {
               />
             </div>
 
-            
+            {/* Email */}
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Email</span>
+                <span className="label-text">
+                  Email
+                </span>
               </label>
 
               <input
                 type="email"
                 placeholder="Enter your email"
                 className="input input-bordered w-full"
-                required
                 value={formData.email}
                 onChange={(e) =>
                   setFormData({
@@ -111,19 +117,20 @@ const SignUpPage = () => {
               />
             </div>
 
-            
+            {/* Password */}
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Password</span>
+                <span className="label-text">
+                  Password
+                </span>
               </label>
 
               <div className="relative">
+
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   className="input input-bordered w-full"
-                  minLength="6"
-                  required
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({
@@ -136,29 +143,36 @@ const SignUpPage = () => {
                 <button
                   type="button"
                   className="absolute right-3 top-1/2 -translate-y-1/2"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() =>
+                    setShowPassword(!showPassword)
+                  }
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
+
               </div>
             </div>
 
-            {/* Submit */}
+            {/* Submit Button */}
             <button
               type="submit"
               className="btn btn-primary w-full"
               disabled={isSigningUp}
             >
-              {isSigningUp ? "Creating Account..." : "Create Account"}
+              {isSigningUp
+                ? "Creating Account..."
+                : "Create Account"}
             </button>
 
           </form>
         </div>
       </div>
 
-      {/* Right Side */}
+      {/* RIGHT SIDE */}
       <div className="hidden lg:flex items-center justify-center bg-base-200">
+
         <div className="text-center p-8">
+
           <h2 className="text-3xl font-bold">
             Welcome to Chat App
           </h2>
@@ -166,8 +180,11 @@ const SignUpPage = () => {
           <p className="mt-2 text-base-content/60">
             Connect with your friends and start chatting.
           </p>
+
         </div>
+
       </div>
+
     </div>
   );
 };

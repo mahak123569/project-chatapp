@@ -4,37 +4,27 @@ import {
   Settings,
   User,
 } from "lucide-react";
-
 import { Link } from "react-router-dom";
-
 import { useAuthStore } from "../Pages/store/useAuthStore";
 
 const Navbar = () => {
-  const {
-    authUser,
-    logout,
-  } = useAuthStore();
+  const { authUser, logout } = useAuthStore();
 
   return (
-    <header className="border-b border-base-300 bg-base-100/90 backdrop-blur">
-
+    <header className="border-b border-base-300 bg-base-100">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
 
         {/* Logo */}
         <Link
           to="/"
-          className="flex items-center gap-2 font-bold text-lg"
+          className="flex items-center gap-2 text-lg font-bold"
         >
           <MessageSquare className="size-6 text-primary" />
-
-          <span>
-            Chat App
-          </span>
+          <span>Chat App</span>
         </Link>
 
         {/* Right Side */}
         {authUser ? (
-
           <div className="flex items-center gap-2">
 
             <Link
@@ -42,7 +32,6 @@ const Navbar = () => {
               className="btn btn-ghost btn-sm gap-2"
             >
               <User className="size-4" />
-
               <span className="hidden sm:inline">
                 Profile
               </span>
@@ -53,7 +42,6 @@ const Navbar = () => {
               className="btn btn-ghost btn-sm gap-2"
             >
               <Settings className="size-4" />
-
               <span className="hidden sm:inline">
                 Settings
               </span>
@@ -65,16 +53,13 @@ const Navbar = () => {
               className="btn btn-ghost btn-sm gap-2"
             >
               <LogOut className="size-4" />
-
               <span className="hidden sm:inline">
                 Logout
               </span>
             </button>
 
           </div>
-
         ) : (
-
           <div className="flex items-center gap-2">
 
             <Link
@@ -92,11 +77,9 @@ const Navbar = () => {
             </Link>
 
           </div>
-
         )}
 
       </nav>
-
     </header>
   );
 };

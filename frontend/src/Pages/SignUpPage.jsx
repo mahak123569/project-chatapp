@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useAuthStore } from "./store/useAuthStore";
+import { Link } from "react-router-dom";
 import { MessageSquare } from "lucide-react";
+import { useAuthStore } from "./store/useAuthStore";
 import toast from "react-hot-toast";
 
 const SignUpPage = () => {
@@ -43,15 +44,11 @@ const SignUpPage = () => {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
-
-      {/* LEFT SIDE */}
+      {/* Left Side */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
-
-          {/* Heading */}
           <div className="text-center mb-8">
             <div className="flex flex-col items-center gap-2">
-
               <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center">
                 <MessageSquare className="size-6 text-primary" />
               </div>
@@ -63,17 +60,13 @@ const SignUpPage = () => {
               <p className="text-base-content/60">
                 Get started with your free account
               </p>
-
             </div>
           </div>
 
-          {/* FORM */}
           <form
             onSubmit={handleSubmit}
             className="space-y-6"
           >
-
-            {/* Full Name */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">
@@ -95,7 +88,6 @@ const SignUpPage = () => {
               />
             </div>
 
-            {/* Email */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">
@@ -117,7 +109,6 @@ const SignUpPage = () => {
               />
             </div>
 
-            {/* Password */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">
@@ -126,7 +117,6 @@ const SignUpPage = () => {
               </label>
 
               <div className="relative">
-
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
@@ -149,11 +139,9 @@ const SignUpPage = () => {
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
-
               </div>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               className="btn btn-primary w-full"
@@ -163,16 +151,25 @@ const SignUpPage = () => {
                 ? "Creating Account..."
                 : "Create Account"}
             </button>
-
           </form>
+
+          <div className="text-center">
+            <p className="text-base-content/60">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="link link-primary"
+              >
+                Login
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* RIGHT SIDE */}
+      {/* Right Side */}
       <div className="hidden lg:flex items-center justify-center bg-base-200">
-
         <div className="text-center p-8">
-
           <h2 className="text-3xl font-bold">
             Welcome to Chat App
           </h2>
@@ -180,11 +177,8 @@ const SignUpPage = () => {
           <p className="mt-2 text-base-content/60">
             Connect with your friends and start chatting.
           </p>
-
         </div>
-
       </div>
-
     </div>
   );
 };

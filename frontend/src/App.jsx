@@ -1,20 +1,13 @@
-import Navbar from "./components/Navbar";
+import { useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { Loader } from "lucide-react";
 
+import Navbar from "./components/Navbar";
 import HomePage from "./Pages/HomePage";
 import SignupPage from "./Pages/SignUpPage";
 import LoginPage from "./Pages/LoginPage";
 import SettingsPage from "./Pages/SettingsPage";
 import ProfilePage from "./Pages/ProfilePage";
-
-import { useEffect } from "react";
-import { Loader } from "lucide-react";
-
-import {
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-
 import { useAuthStore } from "./Pages/store/useAuthStore";
 
 const App = () => {
@@ -41,7 +34,6 @@ const App = () => {
       <Navbar />
 
       <Routes>
-
         <Route
           path="/"
           element={
@@ -96,7 +88,6 @@ const App = () => {
             )
           }
         />
-
       </Routes>
     </>
   );

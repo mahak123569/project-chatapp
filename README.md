@@ -145,8 +145,8 @@ CLOUDINARY_API_SECRET=your_api_secret
 ---
 
 ## 📸 Screenshots
+screenshot
 
-> Add screenshots of your application here.
 
 - Login Page
 - Signup Page

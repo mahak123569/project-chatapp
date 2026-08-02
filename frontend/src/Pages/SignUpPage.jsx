@@ -63,10 +63,8 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6"
-          >
+          <form onSubmit={handleSubmit} className="space-y-6">
+
             <div className="form-control">
               <label className="label">
                 <span className="label-text">
@@ -133,9 +131,7 @@ const SignUpPage = () => {
                 <button
                   type="button"
                   className="absolute right-3 top-1/2 -translate-y-1/2"
-                  onClick={() =>
-                    setShowPassword(!showPassword)
-                  }
+                  onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
@@ -151,6 +147,7 @@ const SignUpPage = () => {
                 ? "Creating Account..."
                 : "Create Account"}
             </button>
+
           </form>
 
           <div className="text-center">
@@ -164,6 +161,7 @@ const SignUpPage = () => {
               </Link>
             </p>
           </div>
+
         </div>
       </div>
 

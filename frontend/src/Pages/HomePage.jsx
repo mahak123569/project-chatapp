@@ -1,5 +1,5 @@
 import Sidebar from "../components/Sidebar";
-import ChatContainer from "../components/ChatContainer";
+import Chatcontainer from "../components/Chatcontainer";
 
 const HomePage = () => {
   return (
@@ -12,7 +12,7 @@ const HomePage = () => {
             <Sidebar />
 
             {/* Chat Area */}
-            <ChatContainer />
+            <Chatcontainer />
 
           </div>
         </div>

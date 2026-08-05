@@ -7,15 +7,15 @@ const Sidebar = () => {
 
       <div className="space-y-3">
         <div className="p-3 rounded-lg bg-base-200">
-          User 1
+          Mahak
         </div>
 
         <div className="p-3 rounded-lg bg-base-200">
-          User 2
+          Rahul
         </div>
 
         <div className="p-3 rounded-lg bg-base-200">
-          User 3
+          Priya
         </div>
       </div>
     </div>

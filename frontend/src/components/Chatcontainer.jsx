@@ -1,18 +1,48 @@
+import { useChatStore } from "../Pages/store/useChatStore";
+import MessageInput from "./MessageInput";
 const ChatContainer = () => {
+  const { selectedUser, messages } = useChatStore();
+
+  if (!selectedUser) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <h2 className="text-xl font-semibold">
+          Select a chat
+        </h2>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 flex flex-col">
 
-      <div className="border-b p-4 font-bold">
-        Select a chat
+      {/* Chat Header */}
+      <div className="border-b border-base-300 p-4">
+        <h2 className="font-bold text-lg">
+          {selectedUser.fullName}
+        </h2>
       </div>
 
-      <div className="flex-1 flex items-center justify-center">
-        Messages will appear here
+      {/* Messages */}
+      <div className="flex-1 p-4 overflow-y-auto">
+        {messages.length === 0 ? (
+          <p className="text-center text-gray-400">
+            No messages yet
+          </p>
+        ) : (
+          messages.map((message) => (
+            <div
+              key={message._id}
+              className="mb-3 p-3 rounded-lg bg-base-200"
+            >
+              {message.text}
+            </div>
+          ))
+        )}
       </div>
 
-      <div className="border-t p-4">
-        Message Input
-      </div>
+      {/* Message Input */}
+     <MessageInput />
 
     </div>
   );

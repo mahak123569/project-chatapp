@@ -1,5 +1,6 @@
-import { useChatStore } from "../Pages/store/useChatStore";
 import MessageInput from "./MessageInput";
+import { useChatStore } from "../Pages/store/useChatStore";
+
 const ChatContainer = () => {
   const { selectedUser, messages } = useChatStore();
 
@@ -18,13 +19,13 @@ const ChatContainer = () => {
 
       {/* Chat Header */}
       <div className="border-b border-base-300 p-4">
-        <h2 className="font-bold text-lg">
+        <h2 className="text-lg font-bold">
           {selectedUser.fullName}
         </h2>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 p-4 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <p className="text-center text-gray-400">
             No messages yet
@@ -33,7 +34,7 @@ const ChatContainer = () => {
           messages.map((message) => (
             <div
               key={message._id}
-              className="mb-3 p-3 rounded-lg bg-base-200"
+              className="mb-2 p-3 rounded-lg bg-base-200"
             >
               {message.text}
             </div>
@@ -42,8 +43,7 @@ const ChatContainer = () => {
       </div>
 
       {/* Message Input */}
-     <MessageInput />
-
+      <MessageInput />
     </div>
   );
 };

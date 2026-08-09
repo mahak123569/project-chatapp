@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { axiosInstance } from "../../components/lib/axios";
 import toast from "react-hot-toast";
+import { io } from "socket.io-client";
+
+const SOCKET_URL = "http://localhost:3002";
 
 export const useChatStore = create((set, get) => ({
   // ==========================
@@ -12,6 +15,8 @@ export const useChatStore = create((set, get) => ({
 
   isUsersLoading: false,
   isMessagesLoading: false,
+
+  socket: null,
 
   // ==========================
   // GET USERS
@@ -65,6 +70,8 @@ export const useChatStore = create((set, get) => ({
   sendMessage: async (messageData) => {
     const { selectedUser, messages } = get();
 
+    if (!selectedUser) return;
+
     try {
       const res = await axiosInstance.post(
         `/messages/send/${selectedUser._id}`,
@@ -82,10 +89,51 @@ export const useChatStore = create((set, get) => ({
   },
 
   // ==========================
+  // CONNECT SOCKET
+  // ==========================
+  connectSocket: () => {
+    const { socket } = get();
+
+    if (socket?.connected) return;
+
+    const newSocket = io(SOCKET_URL, {
+      withCredentials: true,
+    });
+
+    newSocket.on("connect", () => {
+      console.log("Socket connected:", newSocket.id);
+    });
+
+    newSocket.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+
+    set({
+      socket: newSocket,
+    });
+  },
+
+  // ==========================
+  // DISCONNECT SOCKET
+  // ==========================
+  disconnectSocket: () => {
+    const { socket } = get();
+
+    if (socket) {
+      socket.disconnect();
+
+      set({
+        socket: null,
+      });
+    }
+  },
+
+  // ==========================
   // SELECT USER
   // ==========================
   setSelectedUser: (selectedUser) =>
     set({
       selectedUser,
+      messages: [],
     }),
 }));

@@ -15,10 +15,8 @@ const Sidebar = () => {
   }, []);
 
   return (
-    <div className="w-72 border-r border-base-300 p-4">
-      <h2 className="text-xl font-bold mb-4">
-        Chats
-      </h2>
+    <div className="w-64 p-4">
+      <h2 className="text-xl font-bold mb-4">Chats</h2>
 
       <div className="space-y-3">
         {users.map((user) => (
@@ -43,3 +41,4 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+

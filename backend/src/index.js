@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
-
 import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
@@ -35,6 +34,8 @@ app.use(
     credentials: true,
   })
 );
+
+app.set("io", io);
 
 // Routes
 app.use("/api/auth", authRoutes);

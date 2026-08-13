@@ -91,7 +91,7 @@ export const useChatStore = create((set, get) => ({
   // ==========================
   // CONNECT SOCKET
   // ==========================
-  connectSocket: () => {
+  connectSocket: (userId) => {
     const { socket } = get();
 
     if (socket?.connected) return;
@@ -100,10 +100,26 @@ export const useChatStore = create((set, get) => ({
       withCredentials: true,
     });
 
+    // Socket connected
     newSocket.on("connect", () => {
       console.log("Socket connected:", newSocket.id);
+
+      // Join user's own room
+      newSocket.emit("joinUser", userId);
+
+      console.log("Joined room:", userId);
     });
 
+    // Receive new message
+    newSocket.on("newMessage", (newMessage) => {
+      console.log("New message received:", newMessage);
+
+      set((state) => ({
+        messages: [...state.messages, newMessage],
+      }));
+    });
+
+    // Socket disconnected
     newSocket.on("disconnect", () => {
       console.log("Socket disconnected");
     });

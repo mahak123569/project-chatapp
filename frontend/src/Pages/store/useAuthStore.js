@@ -6,7 +6,6 @@ export const useAuthStore = create((set) => ({
   // User data
   authUser: null,
 
-  
   isSigningUp: false,
   isLoggingIn: false,
   isUpdatingProfile: false,
@@ -35,7 +34,7 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  
+  // =========================
   // SIGNUP
   // =========================
   signUp: async (data) => {
@@ -58,8 +57,7 @@ export const useAuthStore = create((set) => ({
       console.log("Error in signup:", error);
 
       toast.error(
-        error.response?.data?.message ||
-          "Signup failed"
+        error.response?.data?.message || "Signup failed"
       );
     } finally {
       set({
@@ -68,7 +66,7 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  
+  // =========================
   // LOGIN
   // =========================
   login: async (data) => {
@@ -91,8 +89,7 @@ export const useAuthStore = create((set) => ({
       console.log("Error in login:", error);
 
       toast.error(
-        error.response?.data?.message ||
-          "Login failed"
+        error.response?.data?.message || "Login failed"
       );
     } finally {
       set({

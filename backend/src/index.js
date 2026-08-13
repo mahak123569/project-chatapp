@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
+
 import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
@@ -16,7 +17,7 @@ const PORT = process.env.PORT || 3002;
 // Create HTTP server
 const server = createServer(app);
 
-// Socket.IO
+// Socket.IO setup
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
@@ -24,10 +25,10 @@ const io = new Server(server, {
   },
 });
 
-// Middleware
-app.use(express.json());
-app.use(cookieParser());
+// Make io available in controllers
+app.set("io", io);
 
+// Middleware
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -35,7 +36,8 @@ app.use(
   })
 );
 
-app.set("io", io);
+app.use(express.json());
+app.use(cookieParser());
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -52,6 +54,6 @@ io.on("connection", (socket) => {
 
 // Start server
 server.listen(PORT, () => {
-  console.log("Server is running on PORT:", PORT);
+  console.log(`Server running on port ${PORT}`);
   connectDB();
 });

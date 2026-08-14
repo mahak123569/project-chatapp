@@ -14,7 +14,7 @@ const HomePage = () => {
 
   useEffect(() => {
     if (authUser?._id) {
-      connectSocket(authUser._id);
+      connectSocket();
     }
 
     return () => {
@@ -27,11 +27,8 @@ const HomePage = () => {
       <div className="flex items-center justify-center pt-20 px-4">
         <div className="bg-base-100 rounded-lg shadow-lg w-full max-w-6xl h-[calc(100vh-8rem)]">
           <div className="flex h-full rounded-lg overflow-hidden">
-
             <Sidebar />
-
             <Chatcontainer />
-
           </div>
         </div>
       </div>

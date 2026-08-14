@@ -47,6 +47,13 @@ app.use("/api/messages", messageRoutes);
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
+  // User ko apne room mein join karvao
+  socket.on("joinRoom", (userId) => {
+    socket.join(userId);
+
+    console.log(`User ${userId} joined room`);
+  });
+
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);
   });

@@ -1,14 +1,15 @@
 import { create } from "zustand";
-import { axiosInstance } from "../../components/lib/axios";
-import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import { axiosInstance } from "../../components/lib/axios";
+import { useAuthStore } from "./useAuthStore";
 
 const SOCKET_URL = "http://localhost:3002";
 
 export const useChatStore = create((set, get) => ({
-  // ==========================
-  // STATES
-  // ==========================
+  // =========================
+  // STATE
+  // =========================
+
   messages: [],
   users: [],
   selectedUser: null,
@@ -18,9 +19,10 @@ export const useChatStore = create((set, get) => ({
 
   socket: null,
 
-  // ==========================
+  // =========================
   // GET USERS
-  // ==========================
+  // =========================
+
   getUsers: async () => {
     set({ isUsersLoading: true });
 
@@ -31,8 +33,9 @@ export const useChatStore = create((set, get) => ({
         users: res.data,
       });
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to load users"
+      console.log(
+        "Error getting users:",
+        error.response?.data?.message || error.message
       );
     } finally {
       set({
@@ -41,9 +44,10 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  // ==========================
+  // =========================
   // GET MESSAGES
-  // ==========================
+  // =========================
+
   getMessages: async (userId) => {
     set({ isMessagesLoading: true });
 
@@ -54,8 +58,9 @@ export const useChatStore = create((set, get) => ({
         messages: res.data,
       });
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to load messages"
+      console.log(
+        "Error getting messages:",
+        error.response?.data?.message || error.message
       );
     } finally {
       set({
@@ -64,13 +69,32 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  // ==========================
-  // SEND MESSAGE
-  // ==========================
-  sendMessage: async (messageData) => {
-    const { selectedUser, messages } = get();
+  // =========================
+  // SELECT USER
+  // =========================
 
-    if (!selectedUser) return;
+  setSelectedUser: (selectedUser) => {
+    set({
+      selectedUser,
+      messages: [],
+    });
+
+    if (selectedUser?._id) {
+      get().getMessages(selectedUser._id);
+    }
+  },
+
+  // =========================
+  // SEND MESSAGE
+  // =========================
+
+  sendMessage: async (messageData) => {
+    const { selectedUser } = get();
+
+    if (!selectedUser?._id) {
+      console.log("No user selected");
+      return;
+    }
 
     try {
       const res = await axiosInstance.post(
@@ -78,21 +102,27 @@ export const useChatStore = create((set, get) => ({
         messageData
       );
 
-      set({
-        messages: [...messages, res.data],
-      });
+      // Sender ko message immediately show karna
+      set((state) => ({
+        messages: [...state.messages, res.data],
+      }));
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to send message"
+      console.log(
+        "Error sending message:",
+        error.response?.data?.message || error.message
       );
     }
   },
 
-  // ==========================
+  // =========================
   // CONNECT SOCKET
-  // ==========================
-  connectSocket: (userId) => {
+  // =========================
+
+  connectSocket: () => {
     const { socket } = get();
+    const { authUser } = useAuthStore.getState();
+
+    if (!authUser) return;
 
     if (socket?.connected) return;
 
@@ -100,26 +130,22 @@ export const useChatStore = create((set, get) => ({
       withCredentials: true,
     });
 
-    // Socket connected
     newSocket.on("connect", () => {
       console.log("Socket connected:", newSocket.id);
 
-      // Join user's own room
-      newSocket.emit("joinUser", userId);
-
-      console.log("Joined room:", userId);
+      // Logged-in user ko uske room mein join karvao
+      newSocket.emit("joinRoom", authUser._id);
     });
 
-    // Receive new message
+    // Receive real-time messages
     newSocket.on("newMessage", (newMessage) => {
-      console.log("New message received:", newMessage);
+      const { messages } = get();
 
-      set((state) => ({
-        messages: [...state.messages, newMessage],
-      }));
+      set({
+        messages: [...messages, newMessage],
+      });
     });
 
-    // Socket disconnected
     newSocket.on("disconnect", () => {
       console.log("Socket disconnected");
     });
@@ -129,27 +155,19 @@ export const useChatStore = create((set, get) => ({
     });
   },
 
-  // ==========================
+  // =========================
   // DISCONNECT SOCKET
-  // ==========================
+  // =========================
+
   disconnectSocket: () => {
     const { socket } = get();
 
-    if (socket) {
+    if (socket?.connected) {
       socket.disconnect();
-
-      set({
-        socket: null,
-      });
     }
-  },
 
-  // ==========================
-  // SELECT USER
-  // ==========================
-  setSelectedUser: (selectedUser) =>
     set({
-      selectedUser,
-      messages: [],
-    }),
+      socket: null,
+    });
+  },
 }));

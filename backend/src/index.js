@@ -60,7 +60,7 @@ io.on("connection", (socket) => {
 });
 
 // Start server
-//run port
+
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   connectDB();

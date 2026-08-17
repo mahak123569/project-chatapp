@@ -9,6 +9,7 @@ import LoginPage from "./Pages/LoginPage";
 import SettingsPage from "./Pages/SettingsPage";
 import ProfilePage from "./Pages/ProfilePage";
 import { useAuthStore } from "./Pages/store/useAuthStore";
+import { useChatStore } from "./Pages/store/useChatStore";
 
 const App = () => {
   const {
@@ -16,10 +17,22 @@ const App = () => {
     checkAuth,
     isCheckingAuth,
   } = useAuthStore();
+  const { connectSocket, disconnectSocket } = useChatStore();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  // Keep one socket alive for the authenticated session, including when navigating
+  // away from the home page. No cleanup here prevents Strict Mode from creating a
+  // connect/disconnect cycle; logout is handled when authUser becomes null.
+  useEffect(() => {
+    if (authUser?._id) {
+      connectSocket();
+    } else {
+      disconnectSocket();
+    }
+  }, [authUser?._id, connectSocket, disconnectSocket]);
 
   if (isCheckingAuth && !authUser) {
     return (

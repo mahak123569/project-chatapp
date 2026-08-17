@@ -7,12 +7,11 @@ const Sidebar = () => {
     getUsers,
     selectedUser,
     setSelectedUser,
-    getMessages,
   } = useChatStore();
 
   useEffect(() => {
     getUsers();
-  }, []);
+  }, [getUsers]);
 
   return (
     <div className="w-64 p-4">
@@ -24,7 +23,6 @@ const Sidebar = () => {
             key={user._id}
             onClick={() => {
               setSelectedUser(user);
-              getMessages(user._id);
             }}
             className={`p-3 rounded-lg cursor-pointer ${
               selectedUser?._id === user._id
@@ -41,4 +39,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-

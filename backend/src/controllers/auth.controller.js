@@ -41,10 +41,8 @@ export const signup = async (req, res) => {
         });
 
         if (newUser) {
-
-            generateToken(newUser._id, res);
-
             await newUser.save();
+            generateToken(newUser._id, res);
 
             res.status(201).json({
                 _id: newUser._id,
@@ -97,7 +95,12 @@ export const login = async (req,res)=> {
 };
 export const logout = async (req,res)=> {
  try {
-    res.cookie("jwt","",{maxAge:0});
+    res.cookie("jwt", "", {
+        maxAge: 0,
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+    });
     res.status(200).json({message:"Logged out successfully"});
 
  } catch (error) {
@@ -136,4 +139,3 @@ res.status(500).json({message: "Internal Server Error"});
     res.status(500).json({message: "Internal Server Error"});
     }
  }
-

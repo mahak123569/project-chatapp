@@ -2,12 +2,14 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import jwt from "jsonwebtoken";
 import { createServer } from "http";
 import { Server } from "socket.io";
 
 import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
+import User from "./models/user.model.js";
 
 dotenv.config();
 
@@ -17,12 +19,25 @@ const PORT = process.env.PORT || 3002;
 // Create HTTP server
 const server = createServer(app);
 
+const CLIENT_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"];
+
+const corsOptions = {
+  origin: CLIENT_ORIGINS,
+  credentials: true,
+};
+
+const getJwtFromCookieHeader = (cookieHeader = "") => {
+  const jwtCookie = cookieHeader
+    .split(";")
+    .map((cookie) => cookie.trim())
+    .find((cookie) => cookie.startsWith("jwt="));
+
+  return jwtCookie ? decodeURIComponent(jwtCookie.slice(4)) : null;
+};
+
 // Socket.IO setup
 const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    credentials: true,
-  },
+  cors: corsOptions,
 });
 
 // Make io available in controllers
@@ -30,10 +45,7 @@ app.set("io", io);
 
 // Middleware
 app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
+  cors(corsOptions)
 );
 
 app.use(express.json());
@@ -43,16 +55,34 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
+// Authenticate the handshake from the same httpOnly JWT cookie used by the API.
+// Joining the user room on the server avoids a race with a client-side joinRoom event.
+io.use(async (socket, next) => {
+  try {
+    const token = getJwtFromCookieHeader(socket.handshake.headers.cookie);
+
+    if (!token) {
+      return next(new Error("Unauthorized socket connection"));
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId).select("_id");
+
+    if (!user) {
+      return next(new Error("Unauthorized socket connection"));
+    }
+
+    socket.userId = user._id.toString();
+    next();
+  } catch (error) {
+    next(new Error("Unauthorized socket connection"));
+  }
+});
+
 // Socket.IO connection
 io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
-
-  // User ko apne room mein join karvao
-  socket.on("joinRoom", (userId) => {
-    socket.join(userId);
-
-    console.log(`User ${userId} joined room`);
-  });
+  socket.join(socket.userId);
+  console.log(`User ${socket.userId} connected and joined their room`);
 
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);

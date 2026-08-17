@@ -22,7 +22,10 @@ export const useAuthStore = create((set) => ({
         authUser: res.data,
       });
     } catch (error) {
-      console.log("Error in checkAuth:", error);
+      // A missing cookie is normal before the user signs in. Other failures are useful to log.
+      if (error.response?.status !== 401) {
+        console.log("Error in checkAuth:", error);
+      }
 
       set({
         authUser: null,

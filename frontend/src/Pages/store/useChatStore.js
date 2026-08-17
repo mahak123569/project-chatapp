@@ -18,6 +18,7 @@ export const useChatStore = create((set, get) => ({
   isMessagesLoading: false,
 
   socket: null,
+  socketUserId: null,
 
   // =========================
   // GET USERS
@@ -54,9 +55,10 @@ export const useChatStore = create((set, get) => ({
     try {
       const res = await axiosInstance.get(`/messages/${userId}`);
 
-      set({
-        messages: res.data,
-      });
+      // Ignore a late response after the user has switched to another chat.
+      if (get().selectedUser?._id === userId) {
+        set({ messages: res.data });
+      }
     } catch (error) {
       console.log(
         "Error getting messages:",
@@ -102,10 +104,14 @@ export const useChatStore = create((set, get) => ({
         messageData
       );
 
-      // Sender ko message immediately show karna
-      set((state) => ({
-        messages: [...state.messages, res.data],
-      }));
+      // The sender receives the HTTP response; the socket event is receiver-only.
+      set((state) => {
+        if (state.messages.some((message) => message._id === res.data._id)) {
+          return state;
+        }
+
+        return { messages: [...state.messages, res.data] };
+      });
     } catch (error) {
       console.log(
         "Error sending message:",
@@ -119,12 +125,14 @@ export const useChatStore = create((set, get) => ({
   // =========================
 
   connectSocket: () => {
-    const { socket } = get();
+    const { socket, socketUserId } = get();
     const { authUser } = useAuthStore.getState();
 
     if (!authUser) return;
 
-    if (socket?.connected) return;
+    if (socket && socketUserId === authUser._id) return;
+
+    socket?.disconnect();
 
     const newSocket = io(SOCKET_URL, {
       withCredentials: true,
@@ -132,17 +140,23 @@ export const useChatStore = create((set, get) => ({
 
     newSocket.on("connect", () => {
       console.log("Socket connected:", newSocket.id);
-
-      // Logged-in user ko uske room mein join karvao
-      newSocket.emit("joinRoom", authUser._id);
     });
 
     // Receive real-time messages
     newSocket.on("newMessage", (newMessage) => {
-      const { messages } = get();
+      const { authUser: currentUser } = useAuthStore.getState();
 
-      set({
-        messages: [...messages, newMessage],
+      set((state) => {
+        const isCurrentConversation =
+          state.selectedUser?._id === newMessage.senderId?.toString() &&
+          newMessage.receiverId?.toString() === currentUser?._id;
+        const alreadyExists = state.messages.some(
+          (message) => message._id === newMessage._id
+        );
+
+        if (!isCurrentConversation || alreadyExists) return state;
+
+        return { messages: [...state.messages, newMessage] };
       });
     });
 
@@ -150,8 +164,13 @@ export const useChatStore = create((set, get) => ({
       console.log("Socket disconnected");
     });
 
+    newSocket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error.message);
+    });
+
     set({
       socket: newSocket,
+      socketUserId: authUser._id,
     });
   },
 
@@ -162,12 +181,11 @@ export const useChatStore = create((set, get) => ({
   disconnectSocket: () => {
     const { socket } = get();
 
-    if (socket?.connected) {
-      socket.disconnect();
-    }
+    socket?.disconnect();
 
     set({
       socket: null,
+      socketUserId: null,
     });
   },
 }));

@@ -4,6 +4,7 @@ import { axiosInstance } from "../../components/lib/axios";
 import { useAuthStore } from "./useAuthStore";
 
 const SOCKET_URL = "http://localhost:3002";
+const asId = (value) => (value == null ? null : String(value));
 
 export const useChatStore = create((set, get) => ({
   // =========================
@@ -98,14 +99,20 @@ export const useChatStore = create((set, get) => ({
       return;
     }
 
+    // Keep the conversation that initiated the request. The user can select a
+    // different chat while the HTTP request is in flight.
+    const receiverId = selectedUser._id;
+
     try {
       const res = await axiosInstance.post(
-        `/messages/send/${selectedUser._id}`,
+        `/messages/send/${receiverId}`,
         messageData
       );
 
       // The sender receives the HTTP response; the socket event is receiver-only.
       set((state) => {
+        if (state.selectedUser?._id !== receiverId) return state;
+
         if (state.messages.some((message) => message._id === res.data._id)) {
           return state;
         }
@@ -148,8 +155,8 @@ export const useChatStore = create((set, get) => ({
 
       set((state) => {
         const isCurrentConversation =
-          state.selectedUser?._id === newMessage.senderId?.toString() &&
-          newMessage.receiverId?.toString() === currentUser?._id;
+          asId(state.selectedUser?._id) === asId(newMessage.senderId) &&
+          asId(newMessage.receiverId) === asId(currentUser?._id);
         const alreadyExists = state.messages.some(
           (message) => message._id === newMessage._id
         );

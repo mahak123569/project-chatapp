@@ -70,6 +70,16 @@ export const sendMessage = async (req, res) => {
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
+    // Resolve the target once so the saved receiver id and Socket.IO room use
+    // the exact same canonical MongoDB id string.
+    const receiver = await User.findById(receiverId).select("_id");
+
+    if (!receiver) {
+      return res.status(404).json({ error: "Receiver not found" });
+    }
+
+    const receiverRoomId = receiver._id.toString();
+
     let imageUrl;
 
     if (image) {
@@ -79,7 +89,7 @@ export const sendMessage = async (req, res) => {
 
     const newMessage = new Message({
       senderId,
-      receiverId,
+      receiverId: receiver._id,
       text,
       image: imageUrl,
     });
@@ -90,7 +100,13 @@ export const sendMessage = async (req, res) => {
     const io = req.app.get("io");
 
     if (io) {
-      io.to(receiverId.toString()).emit("newMessage", newMessage);
+      // Send a plain payload with string ids. This keeps the Zustand
+      // conversation comparison independent of Mongoose/ObjectId serialization.
+      const messageForClient = newMessage.toObject();
+      messageForClient.senderId = messageForClient.senderId.toString();
+      messageForClient.receiverId = messageForClient.receiverId.toString();
+
+      io.to(receiverRoomId).emit("newMessage", messageForClient);
     }
 
     res.status(201).json(newMessage);

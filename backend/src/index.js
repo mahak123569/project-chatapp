@@ -79,16 +79,16 @@ io.use(async (socket, next) => {
   }
 });
 
-// Socket.IO connection
+//  Socket.IO connection
 io.on("connection", async (socket) => {
-  // Never trust a user id supplied by the client. The room is the id verified
-  // from the httpOnly JWT during the handshake.
+
   await socket.join(socket.userId);
 });
 
-// Start server
+ // Start server
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   connectDB();
 });
+

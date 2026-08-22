@@ -23,7 +23,17 @@ export const protectRoute = async (req,res,next) => {
 
     }catch(error){
     console.log("Error in protectRoute middleware:",error.message);
-    res.status(401).json({message:"Unauthorized - Invalid or expired token"})
+
+    // A JWT verification error is an authentication failure. Database errors
+    // (for example a transient Atlas DNS failure) happen after verification and
+    // must not be reported to the client as an invalid token.
+    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
+        return res.status(401).json({message:"Unauthorized - Invalid or expired token"});
+    }
+
+    return res.status(503).json({
+        message: "Authentication service temporarily unavailable. Please retry.",
+    });
     }
     
 };

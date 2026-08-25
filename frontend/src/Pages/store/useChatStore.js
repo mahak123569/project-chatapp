@@ -4,7 +4,23 @@ import { axiosInstance } from "../../components/lib/axios";
 import { useAuthStore } from "./useAuthStore";
 
 const SOCKET_URL = "http://localhost:3002";
+
 const asId = (value) => (value == null ? null : String(value));
+
+const mergeMessages = (...messageLists) => {
+  const uniqueMessages = new Map();
+
+  messageLists.flat().forEach((message) => {
+    if (message?._id) {
+      uniqueMessages.set(asId(message._id), message);
+    }
+  });
+
+  return [...uniqueMessages.values()].sort(
+    (first, second) =>
+      new Date(first.createdAt) - new Date(second.createdAt)
+  );
+};
 
 export const useChatStore = create((set, get) => ({
   // =========================
@@ -56,10 +72,15 @@ export const useChatStore = create((set, get) => ({
     try {
       const res = await axiosInstance.get(`/messages/${userId}`);
 
-      // Ignore a late response after the user has switched to another chat.
-      if (get().selectedUser?._id === userId) {
-        set({ messages: res.data });
-      }
+      set((state) => {
+        if (asId(state.selectedUser?._id) !== asId(userId)) {
+          return state;
+        }
+
+        return {
+          messages: mergeMessages(res.data, state.messages),
+        };
+      });
     } catch (error) {
       console.log(
         "Error getting messages:",
@@ -99,8 +120,6 @@ export const useChatStore = create((set, get) => ({
       return;
     }
 
-    // Keep the conversation that initiated the request. The user can select a
-    // different chat while the HTTP request is in flight.
     const receiverId = selectedUser._id;
 
     try {
@@ -109,15 +128,20 @@ export const useChatStore = create((set, get) => ({
         messageData
       );
 
-      // The sender receives the HTTP response; the socket event is receiver-only.
       set((state) => {
-        if (state.selectedUser?._id !== receiverId) return state;
-
-        if (state.messages.some((message) => message._id === res.data._id)) {
+        if (
+          asId(state.selectedUser?._id) !==
+          asId(receiverId)
+        ) {
           return state;
         }
 
-        return { messages: [...state.messages, res.data] };
+        return {
+          messages: mergeMessages(
+            state.messages,
+            [res.data]
+          ),
+        };
       });
     } catch (error) {
       console.log(
@@ -135,49 +159,150 @@ export const useChatStore = create((set, get) => ({
     const { socket, socketUserId } = get();
     const { authUser } = useAuthStore.getState();
 
-    if (!authUser) return;
+    if (!authUser?._id) {
+      console.log("Socket not connected: user not authenticated");
+      return;
+    }
 
-    if (socket && socketUserId === authUser._id) return;
+    const authenticatedUserId = asId(authUser._id);
 
-    socket?.disconnect();
+    // Don't create another socket for the same user
+    if (
+      socket?.connected &&
+      asId(socketUserId) === authenticatedUserId
+    ) {
+      return;
+    }
+
+    // Disconnect old socket
+    if (socket) {
+      socket.disconnect();
+    }
+
+    console.log(
+      "Connecting socket for user:",
+      authenticatedUserId
+    );
 
     const newSocket = io(SOCKET_URL, {
       withCredentials: true,
+      transports: ["websocket", "polling"],
     });
+
+    // =========================
+    // SOCKET CONNECTED
+    // =========================
 
     newSocket.on("connect", () => {
-      console.log("Socket connected:", newSocket.id);
+      console.log(
+        "Socket connected:",
+        newSocket.id
+      );
+
+      console.log(
+        "Socket user:",
+        authenticatedUserId
+      );
     });
 
-    // Receive real-time messages
+    // =========================
+    // RECEIVE NEW MESSAGE
+    // =========================
+
     newSocket.on("newMessage", (newMessage) => {
-      const { authUser: currentUser } = useAuthStore.getState();
+      console.log(
+        "🔥 NEW MESSAGE RECEIVED:",
+        newMessage
+      );
+
+      const { authUser: currentUser } =
+        useAuthStore.getState();
 
       set((state) => {
-        const isCurrentConversation =
-          asId(state.selectedUser?._id) === asId(newMessage.senderId) &&
-          asId(newMessage.receiverId) === asId(currentUser?._id);
-        const alreadyExists = state.messages.some(
-          (message) => message._id === newMessage._id
+        const selectedUserId = asId(
+          state.selectedUser?._id
         );
 
-        if (!isCurrentConversation || alreadyExists) return state;
+        const currentUserId = asId(
+          currentUser?._id
+        );
 
-        return { messages: [...state.messages, newMessage] };
+        const senderId = asId(
+          newMessage.senderId
+        );
+
+        const receiverId = asId(
+          newMessage.receiverId
+        );
+
+        console.log("Message check:", {
+          selectedUserId,
+          currentUserId,
+          senderId,
+          receiverId,
+        });
+
+        // Message must be:
+        // sender = currently selected user
+        // receiver = logged-in user
+
+        const isCurrentConversation =
+          selectedUserId === senderId &&
+          currentUserId === receiverId;
+
+        console.log(
+          "Is current conversation:",
+          isCurrentConversation
+        );
+
+        const alreadyExists =
+          state.messages.some(
+            (message) =>
+              asId(message._id) ===
+              asId(newMessage._id)
+          );
+
+        if (
+          !isCurrentConversation ||
+          alreadyExists
+        ) {
+          return state;
+        }
+
+        return {
+          messages: mergeMessages(
+            state.messages,
+            [newMessage]
+          ),
+        };
       });
     });
 
-    newSocket.on("disconnect", () => {
-      console.log("Socket disconnected");
+    // =========================
+    // SOCKET DISCONNECTED
+    // =========================
+
+    newSocket.on("disconnect", (reason) => {
+      console.log(
+        "Socket disconnected:",
+        reason
+      );
     });
 
+    // =========================
+    // SOCKET ERROR
+    // =========================
+
     newSocket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error.message);
+      console.error(
+        "Socket connection error:",
+        error.message
+      );
     });
 
     set({
       socket: newSocket,
-      socketUserId: authUser._id,
+      socketUserId: authenticatedUserId,
     });
   },
 
@@ -188,11 +313,16 @@ export const useChatStore = create((set, get) => ({
   disconnectSocket: () => {
     const { socket } = get();
 
-    socket?.disconnect();
+    if (socket) {
+      socket.disconnect();
+    }
 
     set({
       socket: null,
       socketUserId: null,
+      selectedUser: null,
+      messages: [],
+      users: [],
     });
   },
 }));

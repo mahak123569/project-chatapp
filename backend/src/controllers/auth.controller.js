@@ -6,7 +6,9 @@ import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
 
-    const { fullName, email, password } = req.body;
+    const fullName = req.body.fullName?.trim();
+    const email = req.body.email?.trim().toLowerCase();
+    const { password } = req.body;
 
     try {
 
@@ -71,7 +73,8 @@ export const signup = async (req, res) => {
 
 };
 export const login = async (req,res)=> {
-    const { email,password} = req.body;
+    const email = req.body.email?.trim().toLowerCase();
+    const { password } = req.body;
     try{
         const user = await User.findOne({email});
         if (!user){
@@ -123,8 +126,8 @@ export const updateProfile = async(req,res)=>{
     const updatedUser = await User.findByIdAndUpdate(
         userId,
         { profilePic: uploadResponse.secure_url },
-        { new: true }
-    );
+        { new: true, runValidators: true }
+    ).select("-password");
     res.status(200).json(updatedUser);
    } catch (error){
 console.log("Error in update profile:",error);

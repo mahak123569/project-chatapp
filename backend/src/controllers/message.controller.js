@@ -1,4 +1,5 @@
 import cloudinary from "../lib/cloudinary.js";
+import mongoose from "mongoose";
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 
@@ -34,6 +35,10 @@ export const getMessages = async (req, res) => {
     const { id: userToChatId } = req.params;
     const myId = req.user._id;
 
+    if (!mongoose.isValidObjectId(userToChatId)) {
+      return res.status(400).json({ error: "Invalid user id" });
+    }
+
     const messages = await Message.find({
       $or: [
         {
@@ -66,9 +71,22 @@ export const getMessages = async (req, res) => {
 // ==========================
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image } = req.body;
+    const text = req.body.text?.trim() || "";
+    const { image } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
+
+    if (!mongoose.isValidObjectId(receiverId)) {
+      return res.status(400).json({ error: "Invalid receiver id" });
+    }
+
+    if (!text && !image) {
+      return res.status(400).json({ error: "A message must include text or an image" });
+    }
+
+    if (senderId.toString() === receiverId) {
+      return res.status(400).json({ error: "You cannot message yourself" });
+    }
 
     // Resolve the target once so the saved receiver id and Socket.IO room use
     // the exact same canonical MongoDB id string.

@@ -72,17 +72,25 @@ io.use(async (socket, next) => {
       return next(new Error("Unauthorized socket connection"));
     }
 
-    socket.userId = user._id.toString();
-    next();
+    // Store only the server-verified MongoDB id on the socket. This is the
+    // exact room id used by sendMessage for the receiver.
+    socket.data.userId = user._id.toString();
+    return next();
   } catch (error) {
     next(new Error("Unauthorized socket connection"));
   }
 });
 
-//  Socket.IO connection
-io.on("connection", async (socket) => {
+// Each authenticated connection joins its own stable MongoDB user-id room.
+io.on("connection", (socket) => {
+  const userId = socket.data.userId;
 
-  await socket.join(socket.userId);
+  if (!userId) {
+    socket.disconnect(true);
+    return;
+  }
+
+  socket.join(userId.toString());
 });
 
  // Start server
@@ -91,4 +99,3 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   connectDB();
 });
-

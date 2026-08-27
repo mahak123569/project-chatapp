@@ -5,7 +5,7 @@ A full-stack **real-time one-to-one chat application** built with the **MERN Sta
 🔗 **Live Demo:** `ADD_YOUR_DEPLOYED_FRONTEND_URL`
 📦 **GitHub:** `https://github.com/mahak123569/project-chatapp`
 
----
+
 
 ## ✨ Features
 
@@ -53,7 +53,7 @@ A full-stack **real-time one-to-one chat application** built with the **MERN Sta
   * Zustand for frontend application state
   * Axios for API communication
 
----
+
 
 ## 📸 Screenshots
 

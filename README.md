@@ -429,4 +429,3 @@ If you found this project useful or interesting, consider giving the repository 
 
 ## 📄 License
 
-This project is created for learning and portfolio purposes.

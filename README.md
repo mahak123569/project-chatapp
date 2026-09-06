@@ -3,6 +3,7 @@
 A full-stack **real-time one-to-one chat application** built with the **MERN Stack** and **Socket.IO**. Users can securely authenticate, send messages in real time, maintain persistent chat history, and share images through Cloudinary.
 
 🔗 **Live Demo:** `ADD_YOUR_DEPLOYED_FRONTEND_URL`
+
 📦 **GitHub:** `https://github.com/mahak123569/project-chatapp`
 
 
